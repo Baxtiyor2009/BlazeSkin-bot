@@ -1,1638 +1,709 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>BlazeSkin Bot</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --fire: #FF4500;
-    --fire2: #FF6B00;
-    --gold: #FFD700;
-    --gold2: #FFA500;
-    --dark: #0A0A0F;
-    --dark2: #111118;
-    --dark3: #1A1A24;
-    --dark4: #22222F;
-    --card: #181820;
-    --border: #2A2A3A;
-    --text: #E8E8F0;
-    --text2: #9090A8;
-    --green: #00FF88;
-    --blue: #00BFFF;
-    --purple: #8B5CF6;
-    --red: #FF3355;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'Exo 2', sans-serif;
-    background: var(--dark);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    padding-bottom: 80px;
-  }
-
-  /* BACKGROUND */
-  .bg-fx {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background:
-      radial-gradient(ellipse at 20% 0%, rgba(255,69,0,0.15) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 100%, rgba(255,107,0,0.1) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(10,10,15,0) 0%, var(--dark) 70%);
-  }
-  .bg-grid {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image:
-      linear-gradient(rgba(255,69,0,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,69,0,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-
-  .app { position: relative; z-index: 1; }
-
-  /* HEADER */
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px 10px;
-    background: linear-gradient(180deg, rgba(10,10,15,0.98) 0%, transparent 100%);
-    position: sticky; top: 0; z-index: 100;
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255,69,0,0.15);
-  }
-  .logo {
-    display: flex; align-items: center; gap: 8px;
-  }
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 0 15px rgba(255,69,0,0.5);
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-  @keyframes pulse-glow {
-    0%,100% { box-shadow: 0 0 15px rgba(255,69,0,0.5); }
-    50% { box-shadow: 0 0 25px rgba(255,107,0,0.8), 0 0 40px rgba(255,69,0,0.3); }
-  }
-  .logo-text {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900; font-size: 18px;
-    background: linear-gradient(90deg, var(--fire), var(--gold));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: 1px;
-  }
-  .header-coins {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,215,0,0.1);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 20px; padding: 6px 12px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 15px; color: var(--gold);
-  }
-
-  /* PAGES */
-  .page { display: none; padding: 16px; animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* SECTION TITLE */
-  .section-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 13px; font-weight: 700;
-    color: var(--fire); letter-spacing: 2px;
-    text-transform: uppercase; margin-bottom: 12px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .section-title::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(90deg, rgba(255,69,0,0.4), transparent);
-  }
-
-  /* CARDS */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px;
-    margin-bottom: 12px;
-    position: relative; overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .card:active { transform: scale(0.98); }
-  .card::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,69,0,0.03), transparent);
-    pointer-events: none;
-  }
-  .card-glow { border-color: rgba(255,69,0,0.3); }
-  .card-glow::after {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--fire), transparent);
-  }
-
-  /* ======== PAGE 1: HOME ======== */
-  .user-banner {
-    background: linear-gradient(135deg, var(--dark3), var(--dark4));
-    border: 1px solid var(--border);
-    border-radius: 20px; padding: 20px;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 16px;
-    position: relative; overflow: hidden;
-  }
-  .user-banner::before {
-    content: ''; position: absolute;
-    top: -50%; right: -20%; width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(255,69,0,0.1), transparent 70%);
-  }
-  .user-avatar {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-    border: 2px solid rgba(255,69,0,0.4);
-    flex-shrink: 0;
-  }
-  .user-name {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 20px; font-weight: 700; margin-bottom: 4px;
-  }
-  .user-rank {
-    font-size: 12px; color: var(--fire);
-    background: rgba(255,69,0,0.1);
-    border: 1px solid rgba(255,69,0,0.2);
-    border-radius: 20px; padding: 2px 10px;
-    display: inline-block;
-  }
-
-  .coins-display {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 16px;
-  }
-  .coin-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px;
-    text-align: center;
-  }
-  .coin-box .label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
-  .coin-box .value {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 20px; font-weight: 700; color: var(--gold);
-  }
-  .coin-box .sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
-
-  .bonus-section { margin-bottom: 16px; }
-  .bonus-card {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px 16px;
-    margin-bottom: 8px;
-    transition: all 0.2s;
-  }
-  .bonus-card:active { transform: scale(0.98); }
-  .bonus-left { display: flex; align-items: center; gap: 12px; }
-  .bonus-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .bonus-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
-  .bonus-desc { font-size: 12px; color: var(--text2); }
-  .btn-claim {
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    color: #fff; border: none; border-radius: 10px;
-    padding: 8px 16px; font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 14px; cursor: pointer;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(255,69,0,0.3);
-    transition: all 0.2s;
-  }
-  .btn-claim:active { transform: scale(0.95); }
-  .btn-claim.claimed {
-    background: var(--dark3); color: var(--text2);
-    box-shadow: none;
-  }
-  .btn-claim.timer { background: var(--dark4); font-size: 12px; }
-
-  .news-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px; margin-bottom: 8px;
-  }
-  .news-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .news-badge {
-    font-size: 10px; font-weight: 700; letter-spacing: 1px;
-    padding: 3px 8px; border-radius: 20px;
-    background: rgba(255,69,0,0.15); color: var(--fire);
-    border: 1px solid rgba(255,69,0,0.2);
-  }
-  .news-date { font-size: 11px; color: var(--text2); margin-left: auto; }
-  .news-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-  .news-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
-
-  /* ======== PAGE 2: KEYS ======== */
-  .keys-filter {
-    display: flex; gap: 8px; margin-bottom: 16px;
-    overflow-x: auto; padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-  .keys-filter::-webkit-scrollbar { display: none; }
-  .filter-btn {
-    flex-shrink: 0; padding: 7px 16px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; font-family: 'Rajdhani', sans-serif;
-    font-weight: 600; font-size: 13px; color: var(--text2);
-    cursor: pointer; transition: all 0.2s;
-  }
-  .filter-btn.active {
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    border-color: var(--fire); color: #fff;
-    box-shadow: 0 0 12px rgba(255,69,0,0.3);
-  }
-
-  .keys-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .key-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 14px;
-    cursor: pointer; transition: all 0.2s;
-    position: relative; overflow: hidden;
-  }
-  .key-card:active { transform: scale(0.96); }
-  .key-card.rare { border-color: rgba(255,215,0,0.3); }
-  .key-card.epic { border-color: rgba(139,92,246,0.4); }
-  .key-card.legendary { border-color: rgba(255,69,0,0.5); }
-  .key-img {
-    width: 100%; aspect-ratio: 1;
-    background: var(--dark3); border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px; margin-bottom: 10px;
-    position: relative;
-  }
-  .key-rarity {
-    position: absolute; top: 6px; right: 6px;
-    font-size: 9px; font-weight: 700; letter-spacing: 1px;
-    padding: 2px 6px; border-radius: 20px;
-  }
-  .rarity-common { background: rgba(144,144,168,0.2); color: var(--text2); }
-  .rarity-rare { background: rgba(255,215,0,0.15); color: var(--gold); }
-  .rarity-epic { background: rgba(139,92,246,0.2); color: #A78BFA; }
-  .rarity-legendary { background: rgba(255,69,0,0.2); color: var(--fire); }
-  .key-name { font-weight: 600; font-size: 13px; margin-bottom: 6px; line-height: 1.3; }
-  .key-price {
-    display: flex; align-items: center; gap: 4px;
-    font-family: 'Orbitron', sans-serif; font-size: 13px;
-    font-weight: 700; color: var(--gold);
-  }
-  .key-price span { font-size: 11px; }
-
-  /* KEY MODAL */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.85); z-index: 200;
-    align-items: flex-end; justify-content: center;
-    backdrop-filter: blur(10px);
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--dark2);
-    border: 1px solid var(--border);
-    border-radius: 24px 24px 0 0;
-    padding: 24px 20px 40px;
-    width: 100%; max-height: 85vh; overflow-y: auto;
-    animation: slideUp 0.3s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle {
-    width: 40px; height: 4px; background: var(--border);
-    border-radius: 2px; margin: 0 auto 20px;
-  }
-  .modal-key-img {
-    width: 120px; height: 120px; margin: 0 auto 16px;
-    background: var(--dark3); border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 60px;
-  }
-  .modal-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px; font-weight: 700;
-    text-align: center; margin-bottom: 6px;
-  }
-  .modal-drops {
-    margin: 16px 0;
-    background: var(--dark3); border-radius: 12px; padding: 12px;
-  }
-  .drop-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 0; border-bottom: 1px solid var(--border);
-  }
-  .drop-item:last-child { border-bottom: none; }
-  .drop-left { display: flex; align-items: center; gap: 8px; }
-  .drop-icon { font-size: 20px; }
-  .drop-name { font-size: 13px; font-weight: 500; }
-  .drop-chance { font-size: 12px; color: var(--text2); }
-  .btn-open-key {
-    width: 100%; padding: 16px;
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    border: none; border-radius: 14px; color: #fff;
-    font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 700;
-    cursor: pointer; letter-spacing: 1px;
-    box-shadow: 0 8px 24px rgba(255,69,0,0.4);
-    transition: all 0.2s; margin-top: 12px;
-  }
-  .btn-open-key:active { transform: scale(0.98); }
-
-  /* ======== PAGE 3: GAMES ======== */
-  .games-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 16px;
-  }
-  .game-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; text-align: center;
-    cursor: pointer; transition: all 0.2s;
-    position: relative; overflow: hidden;
-  }
-  .game-card:active { transform: scale(0.96); }
-  .game-card .game-icon { font-size: 36px; margin-bottom: 10px; display: block; }
-  .game-card .game-name {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 15px; margin-bottom: 4px;
-  }
-  .game-card .game-desc { font-size: 11px; color: var(--text2); }
-  .game-card .game-reward {
-    margin-top: 10px; font-size: 12px;
-    color: var(--gold); font-weight: 600;
-  }
-  .game-badge {
-    position: absolute; top: 8px; right: 8px;
-    font-size: 9px; font-weight: 700; letter-spacing: 1px;
-    padding: 2px 6px; border-radius: 20px;
-  }
-  .badge-hot { background: rgba(255,69,0,0.2); color: var(--fire); border: 1px solid rgba(255,69,0,0.3); }
-  .badge-new { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
-
-  /* SPIN GAME */
-  .spin-section {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 20px; text-align: center;
-    margin-bottom: 12px;
-  }
-  .spin-wheel-wrap { position: relative; width: 200px; margin: 0 auto 16px; }
-  .spin-wheel {
-    width: 200px; height: 200px; border-radius: 50%;
-    border: 3px solid var(--fire);
-    background: conic-gradient(
-      var(--fire) 0deg 60deg,
-      var(--dark3) 60deg 120deg,
-      var(--gold) 120deg 180deg,
-      var(--dark3) 180deg 240deg,
-      var(--purple) 240deg 300deg,
-      var(--dark3) 300deg 360deg
-    );
-    transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-    box-shadow: 0 0 30px rgba(255,69,0,0.3);
-    position: relative;
-  }
-  .spin-center {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 50px; height: 50px; border-radius: 50%;
-    background: var(--dark2); border: 2px solid var(--fire);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .spin-pointer {
-    position: absolute; top: -15px; left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 20px solid var(--gold);
-  }
-  .btn-spin {
-    background: linear-gradient(135deg, var(--fire), var(--gold));
-    border: none; color: #fff; border-radius: 14px;
-    padding: 12px 32px; font-family: 'Orbitron', sans-serif;
-    font-size: 14px; font-weight: 700; cursor: pointer;
-    box-shadow: 0 6px 20px rgba(255,69,0,0.3);
-    transition: all 0.2s; letter-spacing: 1px;
-  }
-  .btn-spin:active { transform: scale(0.97); }
-  .btn-spin:disabled { opacity: 0.5; }
-
-  /* SHOP */
-  .shop-item {
-    display: flex; align-items: center; gap: 14px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px; margin-bottom: 8px;
-  }
-  .shop-item-img {
-    width: 56px; height: 56px; border-radius: 12px;
-    background: var(--dark3); display: flex;
-    align-items: center; justify-content: center; font-size: 28px;
-    flex-shrink: 0;
-  }
-  .shop-item-info { flex: 1; }
-  .shop-item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-  .shop-item-desc { font-size: 12px; color: var(--text2); }
-  .shop-item-price {
-    font-family: 'Orbitron', sans-serif; font-size: 13px;
-    font-weight: 700; color: var(--gold);
-    white-space: nowrap;
-  }
-  .btn-buy {
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    border: none; color: #fff; border-radius: 10px;
-    padding: 8px 14px; font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 13px; cursor: pointer;
-    transition: all 0.2s; margin-top: 6px;
-  }
-  .btn-buy:active { transform: scale(0.96); }
-
-  /* BATTLE */
-  .battle-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; margin-bottom: 10px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .battle-card:active { transform: scale(0.98); }
-  .battle-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .battle-title { font-weight: 700; font-size: 16px; font-family: 'Rajdhani', sans-serif; }
-  .battle-status {
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    padding: 3px 8px; border-radius: 20px;
-  }
-  .status-live { background: rgba(255,51,85,0.2); color: var(--red); border: 1px solid rgba(255,51,85,0.3); }
-  .status-waiting { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
-  .battle-players { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .bp { display: flex; align-items: center; gap: 6px; flex: 1; }
-  .bp-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-  .bp-name { font-size: 13px; font-weight: 600; }
-  .vs { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: var(--fire); }
-  .battle-prize {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--dark3); border-radius: 10px; padding: 10px 14px;
-  }
-  .prize-label { font-size: 12px; color: var(--text2); }
-  .prize-val { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: var(--gold); }
-
-  /* ======== PAGE 4: INVENTORY ======== */
-  .inv-tabs {
-    display: flex; gap: 4px; margin-bottom: 16px;
-    background: var(--dark3); border-radius: 12px; padding: 4px;
-  }
-  .inv-tab {
-    flex: 1; padding: 9px; text-align: center;
-    border-radius: 9px; font-family: 'Rajdhani', sans-serif;
-    font-weight: 600; font-size: 14px; cursor: pointer;
-    transition: all 0.2s; color: var(--text2);
-  }
-  .inv-tab.active {
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    color: #fff;
-  }
-
-  .inv-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .skin-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 12px; position: relative;
-    cursor: pointer; transition: all 0.2s; overflow: hidden;
-  }
-  .skin-card:active { transform: scale(0.96); }
-  .skin-img {
-    width: 100%; aspect-ratio: 4/3;
-    background: var(--dark3); border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px; margin-bottom: 10px; position: relative;
-  }
-  .skin-wear {
-    position: absolute; bottom: 6px; left: 6px;
-    font-size: 9px; font-weight: 700; padding: 2px 6px;
-    border-radius: 20px; letter-spacing: 1px;
-  }
-  .wear-fn { background: rgba(0,255,136,0.15); color: var(--green); }
-  .wear-mw { background: rgba(0,191,255,0.15); color: var(--blue); }
-  .wear-ft { background: rgba(255,215,0,0.15); color: var(--gold); }
-  .wear-ww { background: rgba(255,107,0,0.15); color: var(--fire2); }
-  .wear-bs { background: rgba(255,51,85,0.15); color: var(--red); }
-  .skin-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
-  .skin-price { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: var(--gold); }
-  .skin-actions {
-    display: flex; gap: 6px; margin-top: 8px;
-  }
-  .btn-sell {
-    flex: 1; padding: 7px; border-radius: 8px;
-    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px;
-    cursor: pointer; border: none; transition: all 0.2s;
-  }
-  .btn-sell-coin { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
-  .btn-sell-trade { background: rgba(0,191,255,0.1); color: var(--blue); border: 1px solid rgba(0,191,255,0.3); }
-  .btn-sell:active { transform: scale(0.96); }
-
-  .inv-stats {
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
-    margin-bottom: 16px;
-  }
-  .inv-stat {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px; text-align: center;
-  }
-  .inv-stat .num {
-    font-family: 'Orbitron', sans-serif; font-size: 18px;
-    font-weight: 700; color: var(--fire); margin-bottom: 4px;
-  }
-  .inv-stat .lbl { font-size: 11px; color: var(--text2); }
-
-  /* ======== PAGE 5: PROFILE ======== */
-  .profile-banner {
-    background: linear-gradient(135deg, var(--dark3), var(--dark4));
-    border: 1px solid var(--border); border-radius: 20px;
-    padding: 24px 20px; text-align: center; margin-bottom: 16px;
-    position: relative; overflow: hidden;
-  }
-  .profile-banner::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(255,69,0,0.1), transparent 60%);
-  }
-  .profile-avatar {
-    width: 80px; height: 80px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 38px; margin: 0 auto 12px;
-    border: 3px solid rgba(255,69,0,0.5);
-    box-shadow: 0 0 20px rgba(255,69,0,0.3);
-  }
-  .profile-name {
-    font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700;
-    margin-bottom: 6px;
-  }
-  .profile-id { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
-  .profile-badges { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-  .badge {
-    padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
-    letter-spacing: 1px;
-  }
-  .badge-fire { background: rgba(255,69,0,0.15); color: var(--fire); border: 1px solid rgba(255,69,0,0.3); }
-  .badge-gold { background: rgba(255,215,0,0.1); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
-  .badge-blue { background: rgba(0,191,255,0.1); color: var(--blue); border: 1px solid rgba(0,191,255,0.3); }
-
-  .profile-stats {
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
-    margin-bottom: 16px;
-  }
-  .p-stat {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px; text-align: center;
-  }
-  .p-stat .val {
-    font-family: 'Orbitron', sans-serif; font-size: 17px;
-    font-weight: 700; color: var(--gold); margin-bottom: 4px;
-  }
-  .p-stat .lbl { font-size: 11px; color: var(--text2); }
-
-  /* TRADE LINK */
-  .trade-section { margin-bottom: 16px; }
-  .trade-input-wrap {
-    display: flex; gap: 8px;
-    background: var(--dark3); border: 1px solid var(--border);
-    border-radius: 14px; padding: 12px 14px;
-    align-items: center;
-  }
-  .trade-input {
-    flex: 1; background: transparent; border: none;
-    color: var(--text); font-family: 'Exo 2', sans-serif;
-    font-size: 13px; outline: none;
-  }
-  .trade-input::placeholder { color: var(--text2); }
-  .btn-save-trade {
-    background: linear-gradient(135deg, var(--fire), var(--fire2));
-    border: none; color: #fff; border-radius: 10px;
-    padding: 8px 14px; font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 13px; cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .profile-menu-item {
-    display: flex; align-items: center; gap: 14px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .profile-menu-item:active { transform: scale(0.98); }
-  .pmi-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-  }
-  .pmi-text { flex: 1; }
-  .pmi-title { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-  .pmi-sub { font-size: 12px; color: var(--text2); }
-  .pmi-arrow { color: var(--text2); font-size: 16px; }
-
-  /* BOTTOM NAV */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: rgba(10,10,15,0.97);
-    border-top: 1px solid rgba(255,69,0,0.15);
-    display: flex; z-index: 100;
-    backdrop-filter: blur(30px);
-    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
-  }
-  .nav-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 4px; padding: 4px;
-    cursor: pointer; transition: all 0.2s; position: relative;
-  }
-  .nav-icon { font-size: 22px; transition: transform 0.2s; }
-  .nav-label {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 10px; font-weight: 600; color: var(--text2);
-    letter-spacing: 0.5px; transition: color 0.2s;
-  }
-  .nav-item.active .nav-icon { transform: scale(1.1); }
-  .nav-item.active .nav-label { color: var(--fire); }
-  .nav-item.active::before {
-    content: ''; position: absolute; top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 30px; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--fire), transparent);
-    border-radius: 0 0 2px 2px;
-  }
-
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--dark3); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px 20px;
-    font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 14px;
-    z-index: 300; opacity: 0; transition: all 0.3s;
-    white-space: nowrap; pointer-events: none;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: rgba(0,255,136,0.3); color: var(--green); }
-  .toast.error { border-color: rgba(255,51,85,0.3); color: var(--red); }
-  .toast.info { border-color: rgba(255,69,0,0.3); color: var(--fire); }
-
-  /* PROGRESS BAR */
-  .progress-wrap { margin-bottom: 6px; }
-  .progress-bar {
-    height: 6px; background: var(--dark3);
-    border-radius: 3px; overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; border-radius: 3px;
-    background: linear-gradient(90deg, var(--fire), var(--gold));
-    transition: width 1s ease;
-  }
-  .progress-label {
-    display: flex; justify-content: space-between;
-    font-size: 11px; color: var(--text2); margin-bottom: 4px;
-  }
-
-  /* OPENING ANIMATION */
-  .opening-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.95); z-index: 500;
-    align-items: center; justify-content: center;
-    flex-direction: column;
-  }
-  .opening-overlay.show { display: flex; }
-  .opening-box {
-    text-align: center;
-    animation: openingAnim 0.5s ease;
-  }
-  @keyframes openingAnim {
-    0% { transform: scale(0.5); opacity: 0; }
-    70% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  .opening-key { font-size: 80px; animation: spin-key 0.5s ease; }
-  @keyframes spin-key {
-    0% { transform: rotate(-180deg) scale(0); }
-    100% { transform: rotate(0deg) scale(1); }
-  }
-  .opening-result { font-size: 40px; margin-top: 20px; }
-  .opening-name {
-    font-family: 'Orbitron', sans-serif; font-size: 18px;
-    font-weight: 700; margin-top: 10px;
-  }
-  .opening-rarity-text { font-size: 14px; margin-top: 6px; opacity: 0.8; }
-  .opening-particles { position: absolute; inset: 0; pointer-events: none; }
-
-  .divider { height: 1px; background: var(--border); margin: 12px 0; }
-
-  /* Scroll to top */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BlazeSkin — CS2 Keys</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --tg-theme-bg-color: #0a0a0a;
+            --tg-theme-text-color: #ffffff;
+            --tg-theme-hint-color: #aaaaaa;
+            --tg-theme-link-color: #ff5e00;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .blaze-header {
+            background: linear-gradient(90deg, #ff5e00, #ff9500);
+            box-shadow: 0 4px 20px rgba(255, 94, 0, 0.4);
+        }
+        
+        .nav-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-item.active {
+            color: #ff5e00;
+            transform: scale(1.1);
+        }
+        
+        .card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(255 94 0 / 0.2);
+        }
+        
+        .skin-rarity {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px currentColor; }
+            to { text-shadow: 0 0 20px currentColor; }
+        }
+        
+        .modal {
+            animation: modalPop 0.3s ease;
+        }
+        
+        .fire-bg {
+            background: linear-gradient(180deg, #1a0f00, #0a0a0a);
+        }
+    </style>
 </head>
-<body>
-<div class="bg-fx"></div>
-<div class="bg-grid"></div>
-
-<div class="app">
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">
-      <div class="logo-icon">🔥</div>
-      <div class="logo-text">BlazeSkin</div>
-    </div>
-    <div class="header-coins">🪙 <span id="headerCoins">0</span></div>
-  </div>
-
-  <!-- ===== PAGE 1: BOSH MENU ===== -->
-  <div class="page active" id="page-home">
-    <!-- User Banner -->
-    <div class="user-banner">
-      <div class="user-avatar" id="homeAvatar">👤</div>
-      <div>
-        <div class="user-name" id="homeName">BlazeSkin</div>
-        <div class="user-rank">🔥 Blaze Rank</div>
-        <div style="margin-top:8px">
-          <div class="progress-label">
-            <span>Level 12</span><span>XP: 840/1000</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div>
+<body class="fire-bg min-h-screen pb-20">
+    <!-- HEADER -->
+    <div class="blaze-header sticky top-0 z-50 px-4 py-3 flex items-center justify-between text-white">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-inner">🔥</div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tighter">BlazeSkin</h1>
+                <p class="text-xs opacity-80 -mt-1">CS2 KEYS &amp; SKINS</p>
+            </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Coins -->
-    <div class="coins-display">
-      <div class="coin-box">
-        <div class="label">💰 Monetalar</div>
-        <div class="value" id="coinDisplay">0</div>
-        <div class="sub">Jami balans</div>
-      </div>
-      <div class="coin-box">
-        <div class="label">🏆 Reytingim</div>
-        <div class="value">#247</div>
-        <div class="sub">Top 500</div>
-      </div>
-    </div>
-
-    <!-- Bonuslar -->
-    <div class="bonus-section">
-      <div class="section-title">🎁 Bonuslar</div>
-
-      <div class="bonus-card card-glow" onclick="claimBonus('daily', this)">
-        <div class="bonus-left">
-          <div class="bonus-icon" style="background:rgba(255,215,0,0.1)">🌅</div>
-          <div>
-            <div class="bonus-title">Kunlik Bonus</div>
-            <div class="bonus-desc">+50 🪙 har kuni</div>
-          </div>
+        
+        <div onclick="showProfileQuick()" class="flex items-center gap-2 bg-black/30 backdrop-blur-md px-4 py-1 rounded-3xl cursor-pointer">
+            <div id="user-avatar" class="w-8 h-8 bg-orange-500 rounded-2xl flex items-center justify-center text-xl">👤</div>
+            <div>
+                <div id="username" class="text-sm font-semibold"></div>
+                <div id="balance-header" class="text-xs flex items-center gap-1">
+                    <span class="text-yellow-400">🪙</span>
+                    <span id="balance-header-value" class="font-mono">0</span>
+                </div>
+            </div>
         </div>
-        <button class="btn-claim" data-type="daily">Olish</button>
-      </div>
+        
+        <div onclick="Telegram.WebApp.close()" class="text-white text-3xl leading-none">✕</div>
+    </div>
 
-      <div class="bonus-card" onclick="claimBonus('weekly', this)">
-        <div class="bonus-left">
-          <div class="bonus-icon" style="background:rgba(139,92,246,0.1)">📅</div>
-          <div>
-            <div class="bonus-title">Haftalik Bonus</div>
-            <div class="bonus-desc">+350 🪙 • <span id="weekTimer" style="color:var(--gold)">6k 12s</span></div>
-          </div>
+    <!-- MAIN CONTENT -->
+    <div class="max-w-2xl mx-auto px-4">
+        
+        <!-- PAGE 1: BOSHI (HOME / MONETA) -->
+        <div id="page-1" class="page">
+            <div class="mt-6 mb-8">
+                <div class="bg-gradient-to-r from-orange-500/10 to-yellow-400/10 border border-orange-500/30 rounded-3xl p-6 text-center">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-orange-300 text-sm font-medium">SIZNING BALANSINGIZ</p>
+                            <div class="flex items-baseline justify-center gap-2 mt-2">
+                                <span id="balance-main" class="text-6xl font-bold font-mono text-white">12480</span>
+                                <span class="text-3xl text-yellow-400">🪙</span>
+                            </div>
+                            <p class="text-xs text-orange-200 mt-1">Blaze Coins</p>
+                        </div>
+                        <div class="text-right">
+                            <div onclick="claimDailyBonus()" class="bg-white text-black text-xs font-bold px-6 py-3 rounded-2xl inline-flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95">
+                                <span>🌟</span>
+                                KUNLIK BONUS
+                            </div>
+                            <div onclick="claimWeeklyBonus()" class="mt-3 bg-white/10 text-white text-xs font-bold px-6 py-3 rounded-2xl inline-flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95">
+                                <span>📅</span>
+                                HAFTALIK BONUS
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bonus kanallar -->
+            <div class="mb-8">
+                <h2 class="text-orange-400 text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span>🔥</span> Qo‘shimcha bonuslar
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div onclick="subscribeBonus(1)" class="bg-zinc-900 border border-orange-500/30 rounded-3xl p-4 cursor-pointer hover:border-orange-500">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="font-semibold">Blaze News</p>
+                                <p class="text-xs text-zinc-400">Obuna bo‘ling → +500 🪙</p>
+                            </div>
+                            <div class="text-4xl">📢</div>
+                        </div>
+                    </div>
+                    <div onclick="subscribeBonus(2)" class="bg-zinc-900 border border-orange-500/30 rounded-3xl p-4 cursor-pointer hover:border-orange-500">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="font-semibold">Blaze Giveaways</p>
+                                <p class="text-xs text-zinc-400">Obuna bo‘ling → +1500 🪙</p>
+                            </div>
+                            <div class="text-4xl">🎁</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yangiliklar -->
+            <div>
+                <h2 class="text-orange-400 text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span>📰</span> Yangiliklar
+                </h2>
+                <div id="news-feed" class="space-y-4">
+                    <!-- JS orqali to‘ldiriladi -->
+                </div>
+            </div>
         </div>
-        <button class="btn-claim" data-type="weekly">Olish</button>
-      </div>
 
-      <div class="bonus-card">
-        <div class="bonus-left">
-          <div class="bonus-icon" style="background:rgba(0,191,255,0.1)">📢</div>
-          <div>
-            <div class="bonus-title">Kanal Bonusi</div>
-            <div class="bonus-desc">+100 🪙 • Obuna bo'lish</div>
-          </div>
+        <!-- PAGE 2: KEYSLAR (SHOP) -->
+        <div id="page-2" class="page hidden">
+            <div class="mt-6">
+                <h2 class="text-3xl font-bold text-center mb-2">CS2 KEYS</h2>
+                <p class="text-center text-orange-300 text-sm mb-8">Har xil narxdagi kalitlar • Bir marta bosib oching</p>
+                
+                <div id="keys-shop" class="grid grid-cols-2 gap-4">
+                    <!-- JS orqali to‘ldiriladi -->
+                </div>
+            </div>
         </div>
-        <button class="btn-claim" onclick="subscribeChannel()">Obuna</button>
-      </div>
 
-      <div class="bonus-card">
-        <div class="bonus-left">
-          <div class="bonus-icon" style="background:rgba(0,255,136,0.1)">👥</div>
-          <div>
-            <div class="bonus-title">Do'st Taklif</div>
-            <div class="bonus-desc">+200 🪙 har bir do'st uchun</div>
-          </div>
+        <!-- PAGE 3: O‘YINLAR -->
+        <div id="page-3" class="page hidden">
+            <div class="mt-6 text-center">
+                <h2 class="text-3xl font-bold mb-8">O‘YINLAR 🔥</h2>
+                
+                <div class="bg-zinc-900 rounded-3xl p-8 mb-6">
+                    <h3 class="text-xl font-semibold mb-4">Keys jangi (1v1)</h3>
+                    <p class="text-zinc-400 mb-8">Ikki o‘yinchi kalit ochadi. Kim yaxshiroq skin chiqarsa — g‘olib!</p>
+                    <button onclick="startKeyBattle()" 
+                            class="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-bold py-5 rounded-3xl text-xl active:scale-95 transition">
+                        JANGGA KIRISH (1000 🪙)
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div onclick="fakeMiniGame(1)" class="bg-zinc-900 rounded-3xl p-6 text-left cursor-pointer hover:bg-orange-500/10">
+                        <div class="text-5xl mb-4">🎰</div>
+                        <p class="font-bold">Daily Spin</p>
+                        <p class="text-xs text-zinc-400">Kuniga 1 marta bepul</p>
+                    </div>
+                    <div onclick="fakeMiniGame(2)" class="bg-zinc-900 rounded-3xl p-6 text-left cursor-pointer hover:bg-orange-500/10">
+                        <div class="text-5xl mb-4">⚔️</div>
+                        <p class="font-bold">Case Battle</p>
+                        <p class="text-xs text-zinc-400">Do‘stlaringiz bilan jang</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button class="btn-claim" onclick="referFriend()">Ulashish</button>
-      </div>
-    </div>
 
-    <!-- Yangiliklar -->
-    <div class="section-title">📰 Yangiliklar</div>
-    <div class="news-card">
-      <div class="news-header">
-        <span class="news-badge">YANGI</span>
-        <span class="news-date">16 Apr 2025</span>
-      </div>
-      <div class="news-title">🔥 Yangi Horizon Case qo'shildi!</div>
-      <div class="news-text">Eng so'nggi CS2 yangilanishidagi kalit endi mavjud. Dragon Lore va Howl chiqish ehtimoli oshirildi!</div>
-    </div>
-    <div class="news-card">
-      <div class="news-header">
-        <span class="news-badge" style="color:var(--gold);background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3)">EVENT</span>
-        <span class="news-date">14 Apr 2025</span>
-      </div>
-      <div class="news-title">🏆 Haftalik turnir boshlanadi</div>
-      <div class="news-text">500,000 🪙 prize pool bilan Kalit Jangi turniri! Qatnashing va G'olib bo'ling!</div>
-    </div>
-    <div class="news-card">
-      <div class="news-header">
-        <span class="news-badge" style="color:var(--blue);background:rgba(0,191,255,0.1);border-color:rgba(0,191,255,0.3)">UPDATE</span>
-        <span class="news-date">10 Apr 2025</span>
-      </div>
-      <div class="news-title">⚡ Tizim yangilandi v2.4</div>
-      <div class="news-text">Trade tizimi yaxshilandi, yangi skin kategoriyalari va tezroq animatsiyalar qo'shildi.</div>
-    </div>
-  </div>
-
-  <!-- ===== PAGE 2: KEYSLAR ===== -->
-  <div class="page" id="page-keys">
-    <div class="section-title">🗝️ Keyslar Do'koni</div>
-
-    <div class="keys-filter">
-      <button class="filter-btn active" onclick="filterKeys('all', this)">Barchasi</button>
-      <button class="filter-btn" onclick="filterKeys('common', this)">Oddiy</button>
-      <button class="filter-btn" onclick="filterKeys('rare', this)">Noyob</button>
-      <button class="filter-btn" onclick="filterKeys('epic', this)">Epic</button>
-      <button class="filter-btn" onclick="filterKeys('legendary', this)">Legendar</button>
-    </div>
-
-    <div class="keys-grid" id="keysGrid">
-      <!-- JS tomonidan to'ldiriladi -->
-    </div>
-  </div>
-
-  <!-- ===== PAGE 3: O'YINLAR ===== -->
-  <div class="page" id="page-games">
-    <div class="section-title">🎮 O'yinlar</div>
-
-    <div class="games-grid">
-      <div class="game-card" onclick="showGame('spin')">
-        <span class="game-badge badge-hot">HOT</span>
-        <span class="game-icon">🎰</span>
-        <div class="game-name">Aylanma G'ildirak</div>
-        <div class="game-desc">Omingizni sinab ko'ring</div>
-        <div class="game-reward">Mukofot: 10-500 🪙</div>
-      </div>
-      <div class="game-card" onclick="showGame('battle')">
-        <span class="game-badge badge-hot">LIVE</span>
-        <span class="game-icon">⚔️</span>
-        <div class="game-name">Kalit Jangi</div>
-        <div class="game-desc">1v1 Duel qiling</div>
-        <div class="game-reward">Mukofot: x2 prize</div>
-      </div>
-      <div class="game-card" onclick="showGame('upgrade')">
-        <span class="game-badge badge-new">YANGI</span>
-        <span class="game-icon">⬆️</span>
-        <div class="game-name">Yangilaw</div>
-        <div class="game-desc">Skinni upgrade qiling</div>
-        <div class="game-reward">Ehtimol: 10-90%</div>
-      </div>
-      <div class="game-card" onclick="showGame('shop')">
-        <span class="game-icon">🛍️</span>
-        <div class="game-name">Do'kon</div>
-        <div class="game-desc">Coin bilan xarid</div>
-        <div class="game-reward">Maxsus chegirmalar</div>
-      </div>
-    </div>
-
-    <!-- Spin Section -->
-    <div id="game-spin" style="display:none">
-      <div class="section-title">🎰 Aylanma G'ildirak</div>
-      <div class="spin-section">
-        <div class="spin-wheel-wrap">
-          <div class="spin-pointer"></div>
-          <div class="spin-wheel" id="spinWheel">
-            <div class="spin-center">🔥</div>
-          </div>
+        <!-- PAGE 4: INVENTAR -->
+        <div id="page-4" class="page hidden">
+            <div class="mt-6">
+                <h2 class="text-3xl font-bold mb-6">Inventar</h2>
+                
+                <!-- Tablar -->
+                <div class="flex border-b border-zinc-700 mb-6">
+                    <button onclick="switchInventoryTab(0)" id="tab-0" 
+                            class="flex-1 py-4 text-center font-semibold border-b-2 border-orange-500 text-orange-400">Tushgan</button>
+                    <button onclick="switchInventoryTab(1)" id="tab-1" 
+                            class="flex-1 py-4 text-center font-semibold text-zinc-400">Sotilgan</button>
+                    <button onclick="switchInventoryTab(2)" id="tab-2" 
+                            class="flex-1 py-4 text-center font-semibold text-zinc-400">Chiqarilgan</button>
+                </div>
+                
+                <div id="inventory-list" class="space-y-4">
+                    <!-- JS orqali to‘ldiriladi -->
+                </div>
+            </div>
         </div>
-        <div style="margin:14px 0;font-size:13px;color:var(--text2)">
-          Har 4 soatda 1 marta bepul
+
+        <!-- PAGE 5: PROFIL -->
+        <div id="page-5" class="page hidden">
+            <div class="mt-8 bg-zinc-900 rounded-3xl p-6">
+                <div class="flex items-center gap-4 mb-8">
+                    <div id="profile-avatar" class="w-16 h-16 bg-orange-500 rounded-3xl flex items-center justify-center text-5xl">🔥</div>
+                    <div>
+                        <div id="profile-name" class="text-2xl font-bold"></div>
+                        <div id="profile-id" class="text-zinc-400 font-mono text-sm"></div>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-2">STEAM TRADE LINK</label>
+                        <input id="trade-link-input" type="text" 
+                               class="w-full bg-black border border-zinc-700 focus:border-orange-500 rounded-2xl px-5 py-4 text-sm outline-none"
+                               placeholder="https://steamcommunity.com/tradeoffer/new/...">
+                        <button onclick="saveTradeLink()" 
+                                class="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-black font-bold py-4 rounded-2xl transition">
+                            SAQLASH
+                        </button>
+                    </div>
+                    
+                    <div class="bg-black/60 rounded-2xl p-5 text-sm">
+                        <p class="font-medium mb-2">🔗 Bot holati: <span class="text-emerald-400">Online</span></p>
+                        <p class="text-zinc-400">Trade link orqali skinlaringizni Steamga chiqarishingiz mumkin.</p>
+                    </div>
+                    
+                    <div onclick="logout()" class="text-center text-red-400 text-sm cursor-pointer">Chiqish</div>
+                </div>
+            </div>
         </div>
-        <button class="btn-spin" id="spinBtn" onclick="spinWheel()">⚡ AYLANTIRISH</button>
-      </div>
     </div>
 
-    <!-- Battle Section -->
-    <div id="game-battle" style="display:none">
-      <div class="section-title">⚔️ Kalit Jangi</div>
-      <div class="battle-card">
-        <div class="battle-header">
-          <div class="battle-title">🔥 Blaze Battle #1234</div>
-          <div class="battle-status status-live">LIVE</div>
+    <!-- BOTTOM NAVIGATION -->
+    <div class="fixed bottom-0 left-0 right-0 bg-black border-t border-orange-500/30 max-w-2xl mx-auto z-50">
+        <div class="flex text-xs font-medium text-zinc-400">
+            <div onclick="navigateTo(1)" class="nav-item flex-1 flex flex-col items-center py-3 active">
+                <span class="text-2xl mb-1">🏠</span>
+                <span>Bosh</span>
+            </div>
+            <div onclick="navigateTo(2)" class="nav-item flex-1 flex flex-col items-center py-3">
+                <span class="text-2xl mb-1">🔑</span>
+                <span>Keyslar</span>
+            </div>
+            <div onclick="navigateTo(3)" class="nav-item flex-1 flex flex-col items-center py-3">
+                <span class="text-2xl mb-1">🎮</span>
+                <span>O‘yinlar</span>
+            </div>
+            <div onclick="navigateTo(4)" class="nav-item flex-1 flex flex-col items-center py-3">
+                <span class="text-2xl mb-1">🎒</span>
+                <span>Inventar</span>
+            </div>
+            <div onclick="navigateTo(5)" class="nav-item flex-1 flex flex-col items-center py-3">
+                <span class="text-2xl mb-1">👤</span>
+                <span>Profil</span>
+            </div>
         </div>
-        <div class="battle-players">
-          <div class="bp">
-            <div class="bp-avatar" style="background:rgba(255,69,0,0.15)">🎮</div>
-            <div class="bp-name">Amir_cs</div>
-          </div>
-          <div class="vs">VS</div>
-          <div class="bp" style="justify-content:flex-end">
-            <div class="bp-name">SkinKing</div>
-            <div class="bp-avatar" style="background:rgba(255,215,0,0.15)">👑</div>
-          </div>
+    </div>
+
+    <!-- CASE OPENING MODAL -->
+    <div id="open-modal" onclick="if(event.target.id === 'open-modal') hideModal()" 
+         class="hidden fixed inset-0 bg-black/90 z-[9999] flex items-end lg:items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-zinc-900 w-full max-w-lg rounded-t-3xl lg:rounded-3xl p-6 text-center">
+            <h3 class="text-2xl font-bold mb-6">Kalit ochilmoqda...</h3>
+            
+            <div id="case-animation" class="mx-auto w-48 h-48 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-3xl flex items-center justify-center text-8xl shadow-2xl mb-8 transition-all">
+                🔑
+            </div>
+            
+            <button onclick="openTheCase()" 
+                    id="open-btn"
+                    class="w-full py-5 bg-gradient-to-r from-orange-500 to-red-500 text-xl font-black text-white rounded-3xl shadow-xl">
+                OCHISH 🔥
+            </button>
+            
+            <div id="result-section" class="hidden mt-8">
+                <p class="text-sm text-zinc-400 mb-3">SIZGA TUSHDI</p>
+                <div id="skin-result" class="flex flex-col items-center"></div>
+                <button onclick="hideModal()" 
+                        class="mt-8 w-full py-4 border border-white/30 text-white font-medium rounded-3xl">
+                    YOPISH
+                </button>
+            </div>
         </div>
-        <div class="battle-prize">
-          <div>
-            <div class="prize-label">Jami Prize Pool</div>
-            <div class="prize-val">2,400 🪙</div>
-          </div>
-          <button class="btn-claim" onclick="joinBattle()">Tomosha</button>
-        </div>
-      </div>
-      <div class="battle-card">
-        <div class="battle-header">
-          <div class="battle-title">💎 Diamond Battle #1235</div>
-          <div class="battle-status status-waiting">KUTILMOQDA</div>
-        </div>
-        <div class="battle-players">
-          <div class="bp">
-            <div class="bp-avatar" style="background:rgba(139,92,246,0.15)">💜</div>
-            <div class="bp-name">Pro_Blaze</div>
-          </div>
-          <div class="vs">VS</div>
-          <div class="bp" style="justify-content:flex-end">
-            <div class="bp-name">???</div>
-            <div class="bp-avatar" style="background:var(--dark3)">❓</div>
-          </div>
-        </div>
-        <div class="battle-prize">
-          <div>
-            <div class="prize-label">Kirish narxi</div>
-            <div class="prize-val">1,200 🪙</div>
-          </div>
-          <button class="btn-claim" onclick="joinBattle2()">Kirish</button>
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:12px">
-        <button class="btn-open-key" style="max-width:300px" onclick="createBattle()">⚔️ YANGI JANG YARATISH</button>
-      </div>
     </div>
 
-    <!-- Upgrade Section -->
-    <div id="game-upgrade" style="display:none">
-      <div class="section-title">⬆️ Skin Yangilaw</div>
-      <div class="card" style="text-align:center;padding:24px">
-        <div style="font-size:60px;margin-bottom:12px">🎯</div>
-        <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">Skinni Yangilash</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:20px">Inventaringizdagi skinni upgrade qiling va qiymatini oshiring</div>
-        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:20px">
-          <div class="card" style="padding:16px;text-align:center">
-            <div style="font-size:32px;margin-bottom:6px">🔫</div>
-            <div style="font-size:12px;font-weight:600">AK-47 Redline</div>
-            <div style="font-size:11px;color:var(--text2)">FT • 240 🪙</div>
-          </div>
-          <div style="font-size:24px;color:var(--fire)">➡️</div>
-          <div class="card" style="padding:16px;text-align:center;border-color:rgba(255,215,0,0.3)">
-            <div style="font-size:32px;margin-bottom:6px">🔫</div>
-            <div style="font-size:12px;font-weight:600">AK-47 Fire Serpent</div>
-            <div style="font-size:11px;color:var(--gold)">FN • 2400 🪙</div>
-          </div>
-        </div>
-        <div style="margin-bottom:16px">
-          <div class="progress-label"><span>Muvaffaqiyat ehtimoli</span><span style="color:var(--fire)">35%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:35%;background:linear-gradient(90deg,var(--fire),var(--red))"></div></div>
-        </div>
-        <button class="btn-open-key" onclick="tryUpgrade()">⚡ YANGILASH (240 🪙)</button>
-      </div>
-    </div>
+    <script>
+        // Tailwind konfiguratsiyasi
+        function initTailwind() {
+            tailwind.config = {
+                content: [],
+                theme: {
+                    extend: {}
+                }
+            }
+        }
 
-    <!-- Shop Section -->
-    <div id="game-shop" style="display:none">
-      <div class="section-title">🛍️ Do'kon</div>
-      <div class="shop-item">
-        <div class="shop-item-img">⚡</div>
-        <div class="shop-item-info">
-          <div class="shop-item-name">Tez Ochish x5</div>
-          <div class="shop-item-desc">5 ta keyni bir vaqtda oching</div>
-          <button class="btn-buy" onclick="buyItem('5x open', 200)">Sotib olish</button>
-        </div>
-        <div class="shop-item-price">200 🪙</div>
-      </div>
-      <div class="shop-item">
-        <div class="shop-item-img">🎯</div>
-        <div class="shop-item-info">
-          <div class="shop-item-name">Lucky Charm</div>
-          <div class="shop-item-desc">24s davomida +10% ehtimol</div>
-          <button class="btn-buy" onclick="buyItem('Lucky Charm', 500)">Sotib olish</button>
-        </div>
-        <div class="shop-item-price">500 🪙</div>
-      </div>
-      <div class="shop-item">
-        <div class="shop-item-img">🔓</div>
-        <div class="shop-item-info">
-          <div class="shop-item-name">VIP Kalit</div>
-          <div class="shop-item-desc">Maxsus VIP skins unlock</div>
-          <button class="btn-buy" onclick="buyItem('VIP Key', 1000)">Sotib olish</button>
-        </div>
-        <div class="shop-item-price">1000 🪙</div>
-      </div>
-      <div class="shop-item">
-        <div class="shop-item-img">💰</div>
-        <div class="shop-item-info">
-          <div class="shop-item-name">Coin Paket x500</div>
-          <div class="shop-item-desc">500 ta coin bir vaqtda</div>
-          <button class="btn-buy" onclick="buyItem('500 coins', 0)" style="background:rgba(255,215,0,0.15);color:var(--gold)">Maxsus!</button>
-        </div>
-        <div class="shop-item-price" style="color:var(--green)">BEPUL</div>
-      </div>
-    </div>
-  </div>
+        // Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        
+        // Global holat
+        let balance = 12480;
+        let inventory = JSON.parse(localStorage.getItem('blaze_inventory')) || [];
+        let tradeLink = localStorage.getItem('blaze_trade_link') || '';
+        
+        // Fake skins bazasi
+        const possibleSkins = [
+            { name: "AK-47 | Redline", rarity: "Mil-Spec", color: "#4a90e2", value: 850, img: "https://picsum.photos/id/1015/280/280" },
+            { name: "Desert Eagle | Blaze", rarity: "Restricted", color: "#ff5e00", value: 2450, img: "https://picsum.photos/id/201/280/280" },
+            { name: "M4A1-S | Hyper Beast", rarity: "Covert", color: "#9c27b0", value: 6200, img: "https://picsum.photos/id/301/280/280" },
+            { name: "AWP | Dragon Lore", rarity: "Covert", color: "#ffd700", value: 12400, img: "https://picsum.photos/id/401/280/280" },
+            { name: "Glock-18 | Fade", rarity: "Restricted", color: "#00ff9d", value: 320, img: "https://picsum.photos/id/501/280/280" },
+            { name: "USP-S | Kill Confirmed", rarity: "Classified", color: "#e91e63", value: 1450, img: "https://picsum.photos/id/601/280/280" }
+        ];
+        
+        // Fake keys (cases)
+        const keysList = [
+            { id: 1, name: "Blaze Basic", price: 800, emoji: "🔑", desc: "Oddiy kalit" },
+            { id: 2, name: "Blaze Premium", price: 2500, emoji: "🔥", desc: "Yuqori chance" },
+            { id: 3, name: "Blaze Legendary", price: 6500, emoji: "🌟", desc: "Covert skin kafolati" },
+            { id: 4, name: "Blaze Dragon", price: 12000, emoji: "🐲", desc: "Dragon Lore chance" }
+        ];
+        
+        // Fake news
+        const newsData = [
+            { title: "Yangi case chiqdi!", text: "Blaze Dragon Case endi mavjud!", time: "15 daqiqa oldin" },
+            { title: "Haftalik turnir", text: "Keys jangida 50000 🪙 sovg‘a!", time: "2 soat oldin" },
+            { title: "Skin yangilanishi", text: "Desert Eagle Blaze narxi o‘sdi", time: "Kecha" }
+        ];
 
-  <!-- ===== PAGE 4: INVENTAR ===== -->
-  <div class="page" id="page-inventory">
-    <div class="section-title">🎒 Mening Inventarim</div>
+        // Sahifalarni almashtirish
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${page}`).classList.remove('hidden');
+            
+            // Nav active
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            const navs = document.querySelectorAll('.nav-item');
+            navs[page-1].classList.add('active');
+            
+            // Agar inventar sahifasi bo‘lsa, yangilash
+            if (page === 4) renderInventory(0);
+        }
 
-    <div class="inv-stats">
-      <div class="inv-stat">
-        <div class="num" id="totalSkins">0</div>
-        <div class="lbl">Jami Skin</div>
-      </div>
-      <div class="inv-stat">
-        <div class="num" id="totalValue">0</div>
-        <div class="lbl">💰 Qiymat</div>
-      </div>
-      <div class="inv-stat">
-        <div class="num" id="soldSkins">0</div>
-        <div class="lbl">Sotilgan</div>
-      </div>
-    </div>
+        // Balansni yangilash
+        function updateBalance() {
+            document.getElementById('balance-main').textContent = balance;
+            document.getElementById('balance-header-value').textContent = balance;
+        }
 
-    <div class="inv-tabs">
-      <div class="inv-tab active" onclick="switchInvTab('owned', this)">Menda bor</div>
-      <div class="inv-tab" onclick="switchInvTab('sold', this)">Sotilgan</div>
-      <div class="inv-tab" onclick="switchInvTab('withdrawn', this)">Chiqarilgan</div>
-    </div>
+        // Kunlik bonus
+        function claimDailyBonus() {
+            const lastClaim = localStorage.getItem('daily_claim');
+            const today = new Date().toDateString();
+            
+            if (lastClaim === today) {
+                tg.showAlert("Bugun allaqachon oldingiz! Ertaga qayta urinib ko‘ring 🔥");
+                return;
+            }
+            
+            balance += 1200;
+            localStorage.setItem('daily_claim', today);
+            updateBalance();
+            tg.showAlert("✅ +1200 Blaze Coins qo‘shildi!");
+        }
 
-    <div class="inv-grid" id="inventoryGrid">
-      <!-- JS tomonidan to'ldiriladi -->
-    </div>
+        // Haftalik bonus
+        function claimWeeklyBonus() {
+            const lastClaim = localStorage.getItem('weekly_claim');
+            const now = Date.now();
+            
+            if (lastClaim && now - parseInt(lastClaim) < 7 * 24 * 60 * 60 * 1000) {
+                tg.showAlert("Haftalik bonus hali berilmagan vaqtda! 7 kundan keyin qayta urinib ko‘ring.");
+                return;
+            }
+            
+            balance += 4500;
+            localStorage.setItem('weekly_claim', now);
+            updateBalance();
+            tg.showAlert("🎉 +4500 Blaze Coins (haftalik) qo‘shildi!");
+        }
 
-    <div id="emptyInv" style="display:none;text-align:center;padding:40px 20px">
-      <div style="font-size:48px;margin-bottom:12px">📦</div>
-      <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">Inventar bo'sh</div>
-      <div style="font-size:13px;color:var(--text2)">Keyslar ochish orqali skin yuting!</div>
-    </div>
-  </div>
+        // Kanallar obunasi bonus
+        function subscribeBonus(type) {
+            if (type === 1) balance += 500;
+            else balance += 1500;
+            updateBalance();
+            tg.showAlert("✅ Obuna uchun bonus qo‘shildi! Rahmat 🔥");
+        }
 
-  <!-- ===== PAGE 5: PROFIL ===== -->
-  <div class="page" id="page-profile">
-    <!-- Profile Banner -->
-    <div class="profile-banner">
-      <div class="profile-avatar" id="profileAvatar">👤</div>
-      <div class="profile-name" id="profileName">BlazeSkin</div>
-      <div class="profile-id" id="profileId">ID: #000000</div>
-      <div class="profile-badges">
-        <span class="badge badge-fire">🔥 Blaze</span>
-        <span class="badge badge-gold">👑 Gold</span>
-        <span class="badge badge-blue">💎 Pro</span>
-      </div>
-    </div>
+        // News render
+        function renderNews() {
+            const container = document.getElementById('news-feed');
+            container.innerHTML = '';
+            newsData.forEach(news => {
+                const div = document.createElement('div');
+                div.className = "bg-zinc-900 rounded-3xl p-5 flex gap-4";
+                div.innerHTML = `
+                    <div class="text-4xl flex-shrink-0">📰</div>
+                    <div class="flex-1">
+                        <p class="font-semibold">${news.title}</p>
+                        <p class="text-zinc-400 text-sm">${news.text}</p>
+                        <p class="text-xs text-orange-300 mt-3">${news.time}</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
 
-    <!-- Stats -->
-    <div class="profile-stats">
-      <div class="p-stat">
-        <div class="val" id="totalOpened">0</div>
-        <div class="lbl">Ochilgan</div>
-      </div>
-      <div class="p-stat">
-        <div class="val" id="profileCoins">0</div>
-        <div class="lbl">🪙 Coins</div>
-      </div>
-      <div class="p-stat">
-        <div class="val">12</div>
-        <div class="lbl">Daraja</div>
-      </div>
-    </div>
+        // Keys shop render
+        function renderKeysShop() {
+            const container = document.getElementById('keys-shop');
+            container.innerHTML = '';
+            
+            keysList.forEach(key => {
+                const card = document.createElement('div');
+                card.className = "card bg-zinc-900 rounded-3xl p-5 text-center cursor-pointer border border-transparent hover:border-orange-500";
+                card.innerHTML = `
+                    <div class="text-6xl mb-4">${key.emoji}</div>
+                    <h4 class="font-bold text-xl">${key.name}</h4>
+                    <p class="text-zinc-400 text-sm">${key.desc}</p>
+                    <div class="mt-6 flex items-center justify-center gap-2 text-2xl font-bold">
+                        ${key.price} <span class="text-yellow-400">🪙</span>
+                    </div>
+                    <button onclick="buyKey(${key.id}); event.stopImmediatePropagation();" 
+                            class="mt-6 w-full py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-black font-bold rounded-2xl text-lg">
+                        SOTIB OLISH
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-    <!-- Trade Link -->
-    <div class="trade-section">
-      <div class="section-title">🔗 Steam Trade Havolasi</div>
-      <div class="trade-input-wrap">
-        <input class="trade-input" id="tradeInput" type="url"
-          placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-          oninput="saveTrade()">
-        <button class="btn-save-trade" onclick="saveTrade(true)">💾 Saqlash</button>
-      </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:6px;padding:0 4px">
-        ⚠️ Steam trade havola sizning Steam profilingizdan olinadi
-      </div>
-    </div>
+        // Kalit sotib olish va ochish
+        function buyKey(id) {
+            const key = keysList.find(k => k.id === id);
+            if (!key) return;
+            
+            if (balance < key.price) {
+                tg.showAlert("Yetarli mablag‘ yo‘q! 🔥");
+                return;
+            }
+            
+            balance -= key.price;
+            updateBalance();
+            
+            // Modal ochish
+            document.getElementById('open-modal').classList.remove('hidden');
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('case-animation').innerHTML = key.emoji;
+            document.getElementById('open-btn').style.display = 'block';
+            
+            // Saqlash uchun tanlangan key
+            window.currentKey = key;
+        }
 
-    <!-- Menu Items -->
-    <div class="section-title">⚙️ Sozlamalar</div>
+        // Kalitni ochish animatsiyasi
+        function openTheCase() {
+            const btn = document.getElementById('open-btn');
+            const anim = document.getElementById('case-animation');
+            
+            btn.style.display = 'none';
+            anim.style.transitionDuration = '1200ms';
+            anim.style.transform = 'rotate(1440deg) scale(0.6)';
+            
+            // Random skin tanlash
+            setTimeout(() => {
+                const skin = possibleSkins[Math.floor(Math.random() * possibleSkins.length)];
+                
+                // Inventarga qo‘shish
+                inventory.unshift({
+                    ...skin,
+                    id: Date.now(),
+                    status: 'tushgan',
+                    openedAt: new Date().toLocaleDateString('uz-UZ')
+                });
+                localStorage.setItem('blaze_inventory', JSON.stringify(inventory));
+                
+                // Natija ko‘rsatish
+                const resultHTML = `
+                    <div class="w-64 h-64 mx-auto rounded-3xl overflow-hidden border-4 border-white shadow-2xl">
+                        <img src="${skin.img}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="mt-6 text-2xl font-bold">${skin.name}</p>
+                    <div class="inline-flex items-center px-6 py-2 mt-2 rounded-3xl text-sm" style="background: ${skin.color}20; color: ${skin.color}">
+                        ${skin.rarity} • ${skin.value} 🪙
+                    </div>
+                `;
+                
+                document.getElementById('skin-result').innerHTML = resultHTML;
+                document.getElementById('result-section').classList.remove('hidden');
+                
+                // Balans yangilash (skin qiymati qo‘shilmaydi, chunki bu virtual)
+                tg.showPopup({
+                    title: "🎉 Tabriklaymiz!",
+                    message: `${skin.name} skinini oldingiz!`,
+                    buttons: [{type: "ok"}]
+                });
+            }, 1300);
+        }
 
-    <div class="profile-menu-item" onclick="openHistory()">
-      <div class="pmi-icon" style="background:rgba(255,69,0,0.1)">📜</div>
-      <div class="pmi-text">
-        <div class="pmi-title">Ochish Tarixi</div>
-        <div class="pmi-sub">Barcha ochilgan keyslar</div>
-      </div>
-      <span class="pmi-arrow">›</span>
-    </div>
+        function hideModal() {
+            const modal = document.getElementById('open-modal');
+            modal.classList.add('hidden');
+            // Reset animation
+            const anim = document.getElementById('case-animation');
+            anim.style.transitionDuration = '300ms';
+            anim.style.transform = 'rotate(0deg) scale(1)';
+        }
 
-    <div class="profile-menu-item" onclick="openLeaderboard()">
-      <div class="pmi-icon" style="background:rgba(255,215,0,0.1)">🏆</div>
-      <div class="pmi-text">
-        <div class="pmi-title">Liderlar Jadvali</div>
-        <div class="pmi-sub">Top o'yinchilar</div>
-      </div>
-      <span class="pmi-arrow">›</span>
-    </div>
+        // O‘yinlar
+        function startKeyBattle() {
+            if (balance < 1000) {
+                tg.showAlert("Jang uchun yetarli coin yo‘q!");
+                return;
+            }
+            balance -= 1000;
+            updateBalance();
+            
+            // Fake battle
+            tg.showPopup({title: "🔥 Keys jangi boshlandi!", message: "Raqibingiz ochmoqda..."});
+            
+            setTimeout(() => {
+                const win = Math.random() > 0.4;
+                if (win) {
+                    balance += 3200;
+                    updateBalance();
+                    tg.showAlert("🏆 Siz g‘alaba qozondingiz! +3200 🪙");
+                    // Bonus skin
+                    inventory.unshift(possibleSkins[3]);
+                    localStorage.setItem('blaze_inventory', JSON.stringify(inventory));
+                } else {
+                    tg.showAlert("😔 Raqib g‘alaba qozondi. Keyingi safar omad!");
+                }
+            }, 2800);
+        }
 
-    <div class="profile-menu-item" onclick="openReferral()">
-      <div class="pmi-icon" style="background:rgba(0,255,136,0.1)">👥</div>
-      <div class="pmi-text">
-        <div class="pmi-title">Do'stlarni Taklif</div>
-        <div class="pmi-sub">0 ta do'st • 0 🪙 ishlangan</div>
-      </div>
-      <span class="pmi-arrow">›</span>
-    </div>
+        function fakeMiniGame(type) {
+            if (type === 1) {
+                balance += 800;
+                updateBalance();
+                tg.showAlert("🎰 Spin! +800 Blaze Coins");
+            } else {
+                tg.showAlert("⚔️ Case Battle hozirda faqat demo rejimida. Tez orada to‘liq versiya!");
+            }
+        }
 
-    <div class="profile-menu-item" onclick="openSupport()">
-      <div class="pmi-icon" style="background:rgba(0,191,255,0.1)">💬</div>
-      <div class="pmi-text">
-        <div class="pmi-title">Qo'llab-Quvvatlash</div>
-        <div class="pmi-sub">@BlazeSkin_support</div>
-      </div>
-      <span class="pmi-arrow">›</span>
-    </div>
+        // Inventar render
+        function renderInventory(tab) {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = '';
+            
+            let filtered = inventory;
+            
+            if (tab === 1) filtered = inventory.filter(s => s.status === 'sotilgan');
+            else if (tab === 2) filtered = inventory.filter(s => s.status === 'chiqarilgan');
+            else filtered = inventory.filter(s => s.status === 'tushgan' || !s.status);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-zinc-400">Hali hech qanday skin yo‘q. Kalit oching! 🔥</div>`;
+                return;
+            }
+            
+            filtered.forEach(skin => {
+                const div = document.createElement('div');
+                div.className = "flex gap-4 bg-zinc-900 rounded-3xl p-4 items-center";
+                div.innerHTML = `
+                    <img src="${skin.img}" class="w-20 h-20 rounded-2xl object-cover">
+                    <div class="flex-1">
+                        <p class="font-semibold">${skin.name}</p>
+                        <p class="text-xs" style="color: \( {skin.color}"> \){skin.rarity}</p>
+                        <p class="text-sm text-yellow-300">${skin.value} 🪙</p>
+                        \( {skin.openedAt ? `<p class="text-[10px] text-zinc-500"> \){skin.openedAt}</p>` : ''}
+                    </div>
+                    ${tab === 0 ? `
+                    <div class="flex flex-col gap-2">
+                        <button onclick="sellSkin(${skin.id});" class="text-xs bg-white text-black px-4 py-2 rounded-2xl">Sotish</button>
+                        <button onclick="withdrawSkin(${skin.id});" class="text-xs border border-white px-4 py-2 rounded-2xl">Chiqarish</button>
+                    </div>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
 
-    <div class="profile-menu-item" onclick="openChannel()">
-      <div class="pmi-icon" style="background:rgba(139,92,246,0.1)">📢</div>
-      <div class="pmi-text">
-        <div class="pmi-title">Rasmiy Kanal</div>
-        <div class="pmi-sub">@BlazeSkin_bot yangiliklari</div>
-      </div>
-      <span class="pmi-arrow">›</span>
-    </div>
-  </div>
-</div>
+        function switchInventoryTab(tab) {
+            document.querySelectorAll('#page-4 button').forEach((b, i) => {
+                if (i === tab) {
+                    b.classList.add('border-b-2', 'border-orange-500', 'text-orange-400');
+                    b.classList.remove('text-zinc-400');
+                } else {
+                    b.classList.remove('border-b-2', 'border-orange-500', 'text-orange-400');
+                    b.classList.add('text-zinc-400');
+                }
+            });
+            renderInventory(tab);
+        }
 
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="navigate('home', this)">
-    <span class="nav-icon">🏠</span>
-    <span class="nav-label">Bosh</span>
-  </div>
-  <div class="nav-item" onclick="navigate('keys', this)">
-    <span class="nav-icon">🗝️</span>
-    <span class="nav-label">Keyslar</span>
-  </div>
-  <div class="nav-item" onclick="navigate('games', this)">
-    <span class="nav-icon">🎮</span>
-    <span class="nav-label">O'yinlar</span>
-  </div>
-  <div class="nav-item" onclick="navigate('inventory', this)">
-    <span class="nav-icon">🎒</span>
-    <span class="nav-label">Inventar</span>
-  </div>
-  <div class="nav-item" onclick="navigate('profile', this)">
-    <span class="nav-icon">👤</span>
-    <span class="nav-label">Profil</span>
-  </div>
-</div>
+        function sellSkin(id) {
+            const skinIndex = inventory.findIndex(s => s.id === id);
+            if (skinIndex === -1) return;
+            balance += Math.floor(inventory[skinIndex].value * 0.7);
+            inventory[skinIndex].status = 'sotilgan';
+            updateBalance();
+            localStorage.setItem('blaze_inventory', JSON.stringify(inventory));
+            renderInventory(0);
+            tg.showAlert("Skin sotildi!");
+        }
 
-<!-- KEY MODAL -->
-<div class="modal-overlay" id="keyModal" onclick="closeModal(event)">
-  <div class="modal" id="modalContent">
-    <div class="modal-handle"></div>
-    <div class="modal-key-img" id="modalImg">🗝️</div>
-    <div class="modal-title" id="modalTitle">Kalit nomi</div>
-    <div style="text-align:center;margin-bottom:12px">
-      <span id="modalRarity" class="key-rarity rarity-common">COMMON</span>
-    </div>
-    <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:16px">
-      <span style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;color:var(--gold)" id="modalPrice">0</span>
-      <span style="color:var(--text2)">🪙</span>
-    </div>
-    <div class="modal-drops" id="modalDrops"></div>
-    <button class="btn-open-key" id="openKeyBtn">🗝️ KEYNI OCHISH</button>
-  </div>
-</div>
+        function withdrawSkin(id) {
+            const skinIndex = inventory.findIndex(s => s.id === id);
+            if (skinIndex === -1) return;
+            inventory[skinIndex].status = 'chiqarilgan';
+            localStorage.setItem('blaze_inventory', JSON.stringify(inventory));
+            renderInventory(0);
+            tg.showAlert("Skin Steam trade ga yuborildi! (demo)");
+        }
 
-<!-- OPENING ANIMATION -->
-<div class="opening-overlay" id="openingOverlay">
-  <div class="opening-box" id="openingBox">
-    <div class="opening-key" id="openingKey">🗝️</div>
-    <div style="font-family:'Orbitron',sans-serif;font-size:13px;color:var(--text2);letter-spacing:2px;margin-top:12px">OCHILMOQDA...</div>
-  </div>
-</div>
+        // Profil
+        function saveTradeLink() {
+            tradeLink = document.getElementById('trade-link-input').value.trim();
+            if (tradeLink) {
+                localStorage.setItem('blaze_trade_link', tradeLink);
+                tg.showAlert("✅ Trade link saqlandi!");
+            }
+        }
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+        function showProfileQuick() {
+            navigateTo(5);
+        }
 
-<script>
-// ============ STATE ============
-const state = {
-  coins: 1250,
-  name: '',
-  id: '',
-  avatar: '👤',
-  inventory: [],
-  soldItems: [],
-  withdrawn: [],
-  totalOpened: 0,
-  dailyClaimed: false,
-  weeklyClaimed: false,
-  tradeLink: '',
-};
+        function logout() {
+            if (confirm("BlazeSkin dan chiqmoqchimisiz?")) {
+                tg.close();
+            }
+        }
 
-// ============ DATA ============
-const KEYS_DATA = [
-  { id:1, name:'Recoil Case', emoji:'🔵', rarity:'common', price:50,
-    drops:[{e:'🔫',n:'MP9 Hot Rod',r:'FN',c:'12%'},{e:'🗡️',n:'Karambit Damascus',r:'MW',c:'5%'},{e:'🎯',n:'USP-S Blueprint',r:'FT',c:'25%'},{e:'💊',n:'AUG Triqua',r:'WW',c:'40%'},{e:'🌊',n:'AK-47 Legion of Anubis',r:'BS',c:'18%'}] },
-  { id:2, name:'Revolution Case', emoji:'🔥', rarity:'rare', price:150,
-    drops:[{e:'🔫',n:'M4A1-S Emphorosaur',r:'FN',c:'8%'},{e:'🗡️',n:'Butterfly Lore',r:'FN',c:'2%'},{e:'🎯',n:'AWP Duality',r:'MW',c:'15%'},{e:'💎',n:'Glock-18 Umbral Rabbit',r:'FT',c:'35%'},{e:'🌟',n:'Desert Eagle Printstream',r:'WW',c:'40%'}] },
-  { id:3, name:'Kilowatt Case', emoji:'⚡', rarity:'epic', price:300,
-    drops:[{e:'🗡️',n:'Karambit Black Laminate',r:'FN',c:'5%'},{e:'🔫',n:'AK-47 Inheritance',r:'MW',c:'10%'},{e:'💜',n:'M4A4 Temukau',r:'FT',c:'20%'},{e:'🟣',n:'AWP Chrome Cannon',r:'FN',c:'8%'},{e:'⚡',n:'MAC-10 Light Box',r:'FN',c:'57%'}] },
-  { id:4, name:'Fever Dream Case', emoji:'🌈', rarity:'rare', price:200,
-    drops:[{e:'🎨',n:'MP5-SD Liquidation',r:'FN',c:'15%'},{e:'🌀',n:'Five-SeveN Hybrid',r:'MW',c:'20%'},{e:'🔮',n:'Negev Ultralight',r:'FT',c:'30%'},{e:'🌈',n:'FAMAS Crypsis',r:'WW',c:'25%'},{e:'💫',n:'M249 Spectre',r:'BS',c:'10%'}] },
-  { id:5, name:'Blaze Dragon Case', emoji:'🐉', rarity:'legendary', price:500,
-    drops:[{e:'🐉',n:'AWP Dragon Lore',r:'FN',c:'1%'},{e:'🗡️',n:'Karambit Fade',r:'FN',c:'3%'},{e:'🔥',n:'AK-47 Fire Serpent',r:'MW',c:'5%'},{e:'💎',n:'M4A4 Howl',r:'FT',c:'2%'},{e:'⭐',n:'Desert Eagle Blaze',r:'FN',c:'89%'}] },
-  { id:6, name:'Horizon Case', emoji:'🌅', rarity:'epic', price:350,
-    drops:[{e:'🌅',n:'AWP Atheris',r:'FN',c:'10%'},{e:'🗡️',n:'Stiletto Knife Doppler',r:'MW',c:'4%'},{e:'🎯',n:'AK-47 Neon Rider',r:'FT',c:'20%'},{e:'🌊',n:'Glock-18 Mossad',r:'FN',c:'30%'},{e:'🏔️',n:'M4A1-S Master Piece',r:'FN',c:'36%'}] },
-];
+        // Profil ma'lumotlarini to‘ldirish
+        function loadProfile() {
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('username').textContent = user.first_name || 'Blaze Player';
+                document.getElementById('profile-name').textContent = user.first_name || 'Blaze Player';
+                document.getElementById('profile-id').textContent = `@${user.username || 'player'}`;
+                document.getElementById('trade-link-input').value = tradeLink;
+            } else {
+                document.getElementById('username').textContent = 'Blaze Player';
+            }
+        }
 
-const SKINS_OWNED = [
-  { emoji:'🔫', name:'AK-47 Redline', wear:'FT', price:240, rarity:'rare' },
-  { emoji:'🗡️', name:'Karambit Doppler', wear:'FN', price:3200, rarity:'legendary' },
-  { emoji:'🎯', name:'AWP Asiimov', wear:'FT', price:450, rarity:'epic' },
-  { emoji:'💜', name:'M4A4 Howl', wear:'WW', price:1200, rarity:'legendary' },
-  { emoji:'⚡', name:'USP-S Blueprint', wear:'MW', price:85, rarity:'common' },
-  { emoji:'🌊', name:'Glock-18 Fade', wear:'FN', price:950, rarity:'epic' },
-];
+        // Asosiy init
+        function initApp() {
+            initTailwind();
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor("#ff5e00");
+            tg.setBackgroundColor("#0a0a0a");
+            
+            // Balansni yuklash
+            const savedBalance = localStorage.getItem('blaze_balance');
+            if (savedBalance) balance = parseInt(savedBalance);
+            updateBalance();
+            
+            // Profil yuklash
+            loadProfile();
+            
+            // Renderlar
+            renderNews();
+            renderKeysShop();
+            renderInventory(0);
+            
+            // Har 30 soniyada balansni saqlash
+            setInterval(() => {
+                localStorage.setItem('blaze_balance', balance);
+            }, 30000);
+            
+            console.log('%c✅ BlazeSkin Telegram Web App muvaffaqiyatli yuklandi! 🔥', 'color:#ff5e00; font-size:13px; font-weight:bold');
+            
+            // Demo uchun birinchi sahifa
+            navigateTo(1);
+        }
 
-let currentKeyData = null;
-let currentInvTab = 'owned';
-let spinRotation = 0;
-let isSpinning = false;
-let activeGame = null;
-
-// ============ INIT ============
-function init() {
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready();
-    tg.expand();
-    const user = tg.initDataUnsafe?.user;
-    if (user) {
-      state.name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-      state.id = '#' + user.id;
-      if (user.username) state.avatar = '👤';
-    }
-  }
-  if (!state.name) state.name = 'BlazeSkin';
-  if (!state.id) state.id = '#' + Math.floor(Math.random()*900000+100000);
-
-  updateUI();
-  renderKeys();
-  renderInventory();
-}
-
-function updateUI() {
-  document.getElementById('headerCoins').textContent = state.coins.toLocaleString();
-  document.getElementById('coinDisplay').textContent = state.coins.toLocaleString();
-  document.getElementById('homeName').textContent = state.name;
-  document.getElementById('profileName').textContent = state.name;
-  document.getElementById('profileId').textContent = 'ID: ' + state.id;
-  document.getElementById('profileCoins').textContent = state.coins.toLocaleString();
-  document.getElementById('totalOpened').textContent = state.totalOpened;
-  document.getElementById('totalSkins').textContent = state.inventory.length + SKINS_OWNED.length;
-  document.getElementById('totalValue').textContent = SKINS_OWNED.reduce((a,s)=>a+s.price,0).toLocaleString();
-  document.getElementById('soldSkins').textContent = state.soldItems.length;
-}
-
-// ============ NAVIGATION ============
-function navigate(page, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  el.classList.add('active');
-  if (page === 'inventory') renderInventory();
-  haptic('light');
-}
-
-// ============ KEYS ============
-function renderKeys(filter = 'all') {
-  const grid = document.getElementById('keysGrid');
-  const filtered = filter === 'all' ? KEYS_DATA : KEYS_DATA.filter(k => k.rarity === filter);
-  grid.innerHTML = filtered.map(key => `
-    <div class="key-card ${key.rarity}" onclick="openKeyModal(${key.id})">
-      <div class="key-img">
-        <span style="font-size:44px">${key.emoji}</span>
-        <span class="key-rarity rarity-${key.rarity}">${key.rarity.toUpperCase()}</span>
-      </div>
-      <div class="key-name">${key.name}</div>
-      <div class="key-price">🪙 <span>${key.price}</span></div>
-    </div>
-  `).join('');
-}
-
-function filterKeys(filter, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderKeys(filter);
-  haptic('light');
-}
-
-function openKeyModal(id) {
-  currentKeyData = KEYS_DATA.find(k => k.id === id);
-  if (!currentKeyData) return;
-  document.getElementById('modalImg').textContent = currentKeyData.emoji;
-  document.getElementById('modalTitle').textContent = currentKeyData.name;
-  document.getElementById('modalPrice').textContent = currentKeyData.price.toLocaleString();
-  const rarEl = document.getElementById('modalRarity');
-  rarEl.textContent = currentKeyData.rarity.toUpperCase();
-  rarEl.className = 'key-rarity rarity-' + currentKeyData.rarity;
-  document.getElementById('modalDrops').innerHTML = currentKeyData.drops.map(d => `
-    <div class="drop-item">
-      <div class="drop-left">
-        <span class="drop-icon">${d.e}</span>
-        <div>
-          <div class="drop-name">${d.n}</div>
-          <div class="drop-chance">${d.r}</div>
-        </div>
-      </div>
-      <span style="font-size:13px;color:var(--text2)">${d.c}</span>
-    </div>
-  `).join('');
-  document.getElementById('openKeyBtn').onclick = () => openKey();
-  document.getElementById('keyModal').classList.add('open');
-  haptic('medium');
-}
-
-function closeModal(e) {
-  if (e.target === document.getElementById('keyModal')) {
-    document.getElementById('keyModal').classList.remove('open');
-  }
-}
-
-function openKey() {
-  if (!currentKeyData) return;
-  if (state.coins < currentKeyData.price) {
-    showToast('⚠️ Yetarli coin yo\'q!', 'error');
-    return;
-  }
-  state.coins -= currentKeyData.price;
-  document.getElementById('keyModal').classList.remove('open');
-
-  // Opening animation
-  const overlay = document.getElementById('openingOverlay');
-  const box = document.getElementById('openingBox');
-  overlay.classList.add('show');
-  document.getElementById('openingKey').textContent = currentKeyData.emoji;
-  box.innerHTML = `<div class="opening-key">${currentKeyData.emoji}</div><div style="font-family:'Orbitron',sans-serif;font-size:13px;color:var(--text2);letter-spacing:2px;margin-top:12px">OCHILMOQDA...</div>`;
-
-  setTimeout(() => {
-    const drop = currentKeyData.drops[Math.floor(Math.random() * currentKeyData.drops.length)];
-    state.inventory.push({ ...drop, key: currentKeyData.name, wear: drop.r });
-    state.totalOpened++;
-
-    box.innerHTML = `
-      <div style="font-size:70px;animation:openingAnim 0.5s ease">${drop.e}</div>
-      <div class="opening-name" style="color:var(--gold);margin-top:16px">${drop.n}</div>
-      <div class="opening-rarity-text" style="color:var(--text2)">${drop.r} • ${currentKeyData.name}</div>
-      <button class="btn-open-key" style="margin-top:24px;max-width:250px" onclick="closeOpening()">🎉 HAYRLI BO'LSIN!</button>
-    `;
-    updateUI();
-    haptic('heavy');
-  }, 1800);
-}
-
-function closeOpening() {
-  document.getElementById('openingOverlay').classList.remove('show');
-  navigate('inventory', document.querySelectorAll('.nav-item')[3]);
-  showToast('🎉 Skin inventarga qo\'shildi!', 'success');
-}
-
-// ============ INVENTORY ============
-function renderInventory() {
-  const grid = document.getElementById('inventoryGrid');
-  const empty = document.getElementById('emptyInv');
-  let items = [];
-
-  if (currentInvTab === 'owned') items = [...SKINS_OWNED, ...state.inventory.map(i => ({
-    emoji: i.e, name: i.n, wear: i.r, price: Math.floor(Math.random()*500+50), rarity: 'common'
-  }))];
-  else if (currentInvTab === 'sold') items = state.soldItems;
-  else items = state.withdrawn;
-
-  if (items.length === 0) {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-
-  const wearClass = {'FN':'wear-fn','MW':'wear-mw','FT':'wear-ft','WW':'wear-ww','BS':'wear-bs'};
-  grid.innerHTML = items.map((s,i) => `
-    <div class="skin-card" onclick="selectSkin(${i})">
-      <div class="skin-img">
-        <span style="font-size:${typeof s.emoji === 'string' ? '36' : '36'}px">${s.emoji || s.e || '🔫'}</span>
-        <span class="skin-wear ${wearClass[s.wear || s.r] || 'wear-ft'}">${s.wear || s.r || 'FT'}</span>
-      </div>
-      <div class="skin-name">${s.name || s.n}</div>
-      <div class="skin-price">🪙 ${(s.price || 100).toLocaleString()}</div>
-      ${currentInvTab === 'owned' ? `
-      <div class="skin-actions">
-        <button class="btn-sell btn-sell-coin" onclick="event.stopPropagation();sellSkin(${i})">💰 Coin</button>
-        <button class="btn-sell btn-sell-trade" onclick="event.stopPropagation();tradeSkin(${i})">🔗 Trade</button>
-      </div>` : ''}
-    </div>
-  `).join('');
-
-  updateUI();
-}
-
-function switchInvTab(tab, el) {
-  currentInvTab = tab;
-  document.querySelectorAll('.inv-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderInventory();
-  haptic('light');
-}
-
-function sellSkin(i) {
-  const items = [...SKINS_OWNED, ...state.inventory.map(i => ({
-    emoji: i.e, name: i.n, wear: i.r, price: Math.floor(Math.random()*500+50)
-  }))];
-  const skin = items[i];
-  if (!skin) return;
-  const price = skin.price || 100;
-  state.coins += price;
-  state.soldItems.push({...skin, soldAt: new Date().toLocaleDateString()});
-  showToast(`💰 ${skin.name || skin.n} ${price} 🪙 ga sotildi!`, 'success');
-  updateUI();
-  haptic('medium');
-}
-
-function tradeSkin(i) {
-  if (!state.tradeLink) {
-    showToast('⚠️ Avval trade havola qo\'ying!', 'error');
-    navigate('profile', document.querySelectorAll('.nav-item')[4]);
-    return;
-  }
-  showToast('🔗 Trade so\'rovi yuborildi!', 'info');
-  haptic('medium');
-}
-
-function selectSkin(i) { haptic('light'); }
-
-// ============ BONUSES ============
-function claimBonus(type, card) {
-  const btn = card.querySelector('.btn-claim');
-  if (btn.classList.contains('claimed')) return;
-  const amounts = { daily: 50, weekly: 350 };
-  state.coins += amounts[type];
-  btn.textContent = '✓ Olindi';
-  btn.classList.add('claimed');
-  state[type + 'Claimed'] = true;
-  updateUI();
-  showToast(`🎁 +${amounts[type]} 🪙 bonus olindi!`, 'success');
-  haptic('heavy');
-}
-
-function subscribeChannel() {
-  window.open('https://t.me/BlazeSkin_bot', '_blank');
-  setTimeout(() => {
-    state.coins += 100;
-    updateUI();
-    showToast('✅ +100 🪙 kanal bonusi!', 'success');
-  }, 2000);
-}
-
-function referFriend() {
-  const tg = window.Telegram?.WebApp;
-  if (tg) tg.openTelegramLink('https://t.me/share/url?url=https://t.me/BlazeSkin_bot&text=BlazeSkin - CS2 Kalit o\'yini! 🔥');
-  showToast('🔗 Havola ulashildi!', 'info');
-}
-
-// ============ GAMES ============
-function showGame(name) {
-  ['spin','battle','upgrade','shop'].forEach(g => {
-    document.getElementById('game-'+g).style.display = 'none';
-  });
-  document.getElementById('game-'+name).style.display = 'block';
-  document.getElementById('game-'+name).scrollIntoView({behavior:'smooth'});
-  activeGame = name;
-  haptic('medium');
-}
-
-function spinWheel() {
-  if (isSpinning) return;
-  isSpinning = true;
-  const btn = document.getElementById('spinBtn');
-  btn.disabled = true;
-  const extra = 1440 + Math.floor(Math.random() * 360);
-  spinRotation += extra;
-  document.getElementById('spinWheel').style.transform = `rotate(${spinRotation}deg)`;
-  haptic('medium');
-  setTimeout(() => {
-    const rewards = [10,25,50,100,200,500];
-    const prize = rewards[Math.floor(Math.random()*rewards.length)];
-    state.coins += prize;
-    updateUI();
-    showToast(`🎰 Tabriklaymiz! +${prize} 🪙 yutdingiz!`, 'success');
-    isSpinning = false;
-    btn.disabled = false;
-    btn.textContent = '⚡ AYLANTIRISH';
-    haptic('heavy');
-  }, 3200);
-}
-
-function joinBattle() { showToast('👁️ Jangni kuzatmoqdasiz...', 'info'); haptic('medium'); }
-function joinBattle2() {
-  if (state.coins < 1200) { showToast('⚠️ 1200 🪙 kerak!', 'error'); return; }
-  state.coins -= 1200;
-  updateUI();
-  showToast('⚔️ Jangga qo\'shildingiz!', 'success');
-  haptic('heavy');
-}
-function createBattle() { showToast('🔨 Jang yaratildi! Raqib kutilmoqda...', 'info'); haptic('medium'); }
-
-function tryUpgrade() {
-  if (state.coins < 240) { showToast('⚠️ Yetarli coin yo\'q!', 'error'); return; }
-  state.coins -= 240;
-  const success = Math.random() < 0.35;
-  updateUI();
-  if (success) showToast('🎉 MUVAFFAQIYATLI YANGILANDI!', 'success');
-  else showToast('💥 Yangilaw muvaffaqiyatsiz!', 'error');
-  haptic(success ? 'heavy' : 'medium');
-}
-
-function buyItem(name, price) {
-  if (price > 0 && state.coins < price) { showToast(`⚠️ ${price} 🪙 kerak!`, 'error'); return; }
-  if (price > 0) state.coins -= price;
-  else state.coins += 500;
-  updateUI();
-  showToast(price > 0 ? `🛍️ ${name} sotib olindi!` : '🎁 +500 🪙 qo\'shildi!', 'success');
-  haptic('medium');
-}
-
-// ============ PROFILE ============
-function saveTrade(manual) {
-  state.tradeLink = document.getElementById('tradeInput').value;
-  if (manual && state.tradeLink) showToast('✅ Trade havola saqlandi!', 'success');
-}
-
-function openHistory() { showToast('📜 Ochish tarixi tez orada...', 'info'); }
-function openLeaderboard() { showToast('🏆 Liderlar jadvali tez orada...', 'info'); }
-function openReferral() { referFriend(); }
-function openSupport() { window.open('https://t.me/BlazeSkin_support', '_blank'); }
-function openChannel() { window.open('https://t.me/BlazeSkin_bot', '_blank'); }
-
-// ============ UTILS ============
-function showToast(msg, type = 'info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function haptic(style) {
-  const tg = window.Telegram?.WebApp;
-  if (tg?.HapticFeedback) {
-    if (style === 'heavy') tg.HapticFeedback.impactOccurred('heavy');
-    else if (style === 'medium') tg.HapticFeedback.impactOccurred('medium');
-    else tg.HapticFeedback.impactOccurred('light');
-  }
-}
-
-// ============ WEEKLY TIMER ============
-function updateWeekTimer() {
-  const now = new Date();
-  const nextMon = new Date(now);
-  nextMon.setDate(now.getDate() + (7 - now.getDay() + 1) % 7 || 7);
-  nextMon.setHours(0,0,0,0);
-  const diff = nextMon - now;
-  const d = Math.floor(diff/86400000);
-  const h = Math.floor((diff%86400000)/3600000);
-  const m = Math.floor((diff%3600000)/60000);
-  const el = document.getElementById('weekTimer');
-  if (el) el.textContent = `${d}k ${h}s ${m}d`;
-}
-setInterval(updateWeekTimer, 60000);
-updateWeekTimer();
-
-// START
-init();
-</script>
+        // Appni ishga tushirish
+        window.onload = initApp;
+    </script>
 </body>
 </html>
